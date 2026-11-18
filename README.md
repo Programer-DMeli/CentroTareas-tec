@@ -11,3 +11,6 @@
   - `Antes: main` (hilo principal antes de entrar al cambio de contexto).
   - `Dentro: DefaultDispatcher-worker-...` (hilo de segundo plano donde se ejecuta la demora).
   - `Despues: main` (retorno al hilo principal para actualizar el estado a "Terminó").
+
+## Observación del Paso 3
+- **Progreso en tiempo real**: Se implementó `LinearProgressIndicator` enlazado a un `StateFlow<Float>` de `0f` a `1f` en el ViewModel. Durante las 100 iteraciones con `delay(40)` dentro de `Dispatchers.Default`, el progreso avanza progresivamente hasta el 100% (~4 segundos) mientras la UI se mantiene 100% responsiva (permitiendo seguir incrementando el contador con el botón "Tócame").

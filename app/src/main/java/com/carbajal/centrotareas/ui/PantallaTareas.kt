@@ -25,6 +25,7 @@ import com.carbajal.centrotareas.viewmodel.TareasViewModel
 fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
     val contador by viewModel.contador.collectAsState()
     val mensaje by viewModel.mensaje.collectAsState()
+    val progreso by viewModel.progreso.collectAsState()
 
     Scaffold(
         topBar = {
@@ -75,8 +76,24 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                             .wrapContentWidth(),
                         shape = RoundedCornerShape(50)
                     ) {
-                        Text("Tarea larga", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Iniciar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
+
+                    LinearProgressIndicator(
+                        progress = { progreso },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+
+                    val porcentaje = (progreso * 100).toInt()
+                    Text(
+                        text = "$porcentaje %",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
                     Text(
                         text = mensaje,
@@ -89,29 +106,30 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Dashed observation box for Step 2
+            // Dashed observation box for Step 3
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(50))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFE3F2FD))
                     .dashedBorder(
                         width = 1.5.dp,
                         color = Color(0xFF90CAF9),
-                        cornerRadius = 24.dp,
+                        cornerRadius = 8.dp,
                         dashLength = 6.dp,
                         gapLength = 4.dp
                     )
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Los toques siguen sumando mientras trabaja",
+                    text = "La barra avanza de 0 a 100 % en unos 4 segundos\ny el contador Tócame sigue sumando.",
                     color = Color(0xFF1565C0),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
                 )
             }
         }
