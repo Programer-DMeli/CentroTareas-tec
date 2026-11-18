@@ -16,12 +16,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class DosCargasResultado(
-    val modo: String,
-    val perfil: String,
-    val numPedidos: Int,
-    val tiempoMs: Long
-)
+sealed interface DosCargasState {
+    object Idle : DosCargasState
+    object Cargando : DosCargasState
+    data class Exito(
+        val modo: String,
+        val perfil: String,
+        val cantidadPedidos: Int,
+        val ms: Long
+    ) : DosCargasState
+    data class Error(val mensaje: String) : DosCargasState
+}
 
 class TareasViewModel(
     private val repository: TareasRepository = TareasRepositoryLocal()
@@ -52,12 +57,16 @@ class TareasViewModel(
 
     private var trabajoPrimos: Job? = null
 
-    // --- Step 6: Dos cargas states ---
-    private val _dosCargasCorriendo = MutableStateFlow(false)
-    val dosCargasCorriendo: StateFlow<Boolean> = _dosCargasCorriendo.asStateFlow()
+    // --- Step 6 & 7: Dos cargas states & simularError ---
+    private val _dosCargasState = MutableStateFlow<DosCargasState>(DosCargasState.Idle)
+    val dosCargasState: StateFlow<DosCargasState> = _dosCargasState.asStateFlow()
 
-    private val _dosCargasResultado = MutableStateFlow<DosCargasResultado?>(null)
-    val dosCargasResultado: StateFlow<DosCargasResultado?> = _dosCargasResultado.asStateFlow()
+    private val _simularError = MutableStateFlow(false)
+    val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
+
+    fun cambiarSimularError(valor: Boolean) {
+        _simularError.value = valor
+    }
 
     fun incrementarContador() {
         _contador.value += 1
@@ -129,56 +138,54 @@ class TareasViewModel(
     }
 
     fun cargarUnaPorUna() {
-        if (_dosCargasCorriendo.value) return
+        if (_dosCargasState.value is DosCargasState.Cargando) return
 
         viewModelScope.launch {
-            _dosCargasCorriendo.value = true
-            _dosCargasResultado.value = null
+            _dosCargasState.value = DosCargasState.Cargando
             val inicio = System.currentTimeMillis()
 
             try {
                 val perfil = repository.cargarPerfil()
-                val pedidos = repository.cargarPedidos(false)
+                val pedidos = repository.cargarPedidos(_simularError.value)
                 val tiempo = System.currentTimeMillis() - inicio
-                _dosCargasResultado.value = DosCargasResultado(
+                _dosCargasState.value = DosCargasState.Exito(
                     modo = "Una por una",
                     perfil = perfil,
-                    numPedidos = pedidos.size,
-                    tiempoMs = tiempo
+                    cantidadPedidos = pedidos.size,
+                    ms = tiempo
                 )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
-                // handle error
-            } finally {
-                _dosCargasCorriendo.value = false
+                _dosCargasState.value = DosCargasState.Error("No se pudo cargar: ${e.localizedMessage}")
             }
         }
     }
 
-    fun cargarALaVez() {   //se implemento cargar a la vez utilizando cooutineScope y Async par aejecutar ambas operaciones en paraleo
-        if (_dosCargasCorriendo.value) return
+    fun cargarALaVez() { // Se implementó cargar a la vez utilizando coroutineScope y async para ejecutar ambas operaciones en paralelo
+        if (_dosCargasState.value is DosCargasState.Cargando) return
 
         viewModelScope.launch {
-            _dosCargasCorriendo.value = true
-            _dosCargasResultado.value = null
+            _dosCargasState.value = DosCargasState.Cargando
             val inicio = System.currentTimeMillis()
 
             try {
                 val resultado = coroutineScope {
                     val a = async { repository.cargarPerfil() }
-                    val b = async { repository.cargarPedidos(false) }
+                    val b = async { repository.cargarPedidos(_simularError.value) }
                     Pair(a.await(), b.await())
                 }
                 val tiempo = System.currentTimeMillis() - inicio
-                _dosCargasResultado.value = DosCargasResultado(
+                _dosCargasState.value = DosCargasState.Exito(
                     modo = "A la vez",
                     perfil = resultado.first,
-                    numPedidos = resultado.second.size,
-                    tiempoMs = tiempo
+                    cantidadPedidos = resultado.second.size,
+                    ms = tiempo
                 )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
-                // handle error
-            } finally {
-                _dosCargasCorriendo.value = false
+                _dosCargasState.value = DosCargasState.Error("No se pudo cargar: ${e.localizedMessage}")
             }
         }
     }

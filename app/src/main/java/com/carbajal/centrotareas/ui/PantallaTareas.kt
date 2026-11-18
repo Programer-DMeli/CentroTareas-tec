@@ -2,8 +2,10 @@ package com.carbajal.centrotareas.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.carbajal.centrotareas.viewmodel.DosCargasState
 import com.carbajal.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,8 +32,11 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
     val primosResultado by viewModel.primosResultado.collectAsState()
     val primosCorriendo by viewModel.primosCorriendo.collectAsState()
 
-    val dosCargasCorriendo by viewModel.dosCargasCorriendo.collectAsState()
-    val dosCargasResultado by viewModel.dosCargasResultado.collectAsState()
+    val dosCargasState by viewModel.dosCargasState.collectAsState()
+    val simularError by viewModel.simularError.collectAsState()
+    val dosCargasCorriendo = dosCargasState is DosCargasState.Cargando
+
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -45,8 +51,9 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(scrollState)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Card 1: Tarea con progreso
@@ -237,6 +244,22 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Switch(
+                            checked = simularError,
+                            onCheckedChange = { viewModel.cambiarSimularError(it) }
+                        )
+                        Text(
+                            text = "Simular error",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         OutlinedButton(
                             onClick = { viewModel.cargarUnaPorUna() },
                             enabled = !dosCargasCorriendo,
@@ -264,7 +287,8 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                         )
                     }
 
-                    dosCargasResultado?.let { res ->
+                    if (dosCargasState is DosCargasState.Exito) {
+                        val res = dosCargasState as DosCargasState.Exito
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -278,10 +302,10 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    text = "Modo: ${res.modo}",
-                                    color = Color(0xFF1B5E20),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
+                                   text = "Modo: ${res.modo}",
+                                   color = Color(0xFF1B5E20),
+                                   fontSize = 15.sp,
+                                   fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = "Perfil: ${res.perfil}",
@@ -290,18 +314,46 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
-                                    text = "Pedidos: ${res.numPedidos}",
+                                    text = "Pedidos: ${res.cantidadPedidos}",
                                     color = Color(0xFF1B5E20),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
-                                    text = "Tiempo: ${res.tiempoMs} ms",
+                                    text = "Tiempo: ${res.ms} ms",
                                     color = Color(0xFF1B5E20),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
+                        }
+                    }
+
+                    if (dosCargasState is DosCargasState.Error) {
+                        val errorRes = dosCargasState as DosCargasState.Error
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFFFEBEE))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = errorRes.mensaje,
+                                color = Color(0xFFC62828),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = { viewModel.cargarALaVez() },
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text("Reintentar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
