@@ -69,13 +69,13 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                     }
 
                     Button(
-                        onClick = { viewModel.tareaLargaMala() },
+                        onClick = { viewModel.tareaLarga() },
                         modifier = Modifier
                             .height(48.dp)
                             .wrapContentWidth(),
                         shape = RoundedCornerShape(50)
                     ) {
-                        Text("Tarea larga (MAL)", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Tarea larga", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
 
                     Text(
@@ -89,30 +89,29 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Dashed observation box
+            // Dashed observation box for Step 2
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFFFEBEE))
+                    .clip(RoundedCornerShape(50))
+                    .background(Color(0xFFE3F2FD))
                     .dashedBorder(
                         width = 1.5.dp,
-                        color = Color(0xFFD32F2F),
-                        cornerRadius = 8.dp,
+                        color = Color(0xFF90CAF9),
+                        cornerRadius = 24.dp,
                         dashLength = 6.dp,
                         gapLength = 4.dp
                     )
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Lo que observas: durante 4 segundos\nnada responde y el texto\n«Trabajando...» no aparece",
-                    color = Color(0xFFB71C1C),
+                    text = "Los toques siguen sumando mientras trabaja",
+                    color = Color(0xFF1565C0),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
+                    textAlign = TextAlign.Center
                 )
             }
         }
