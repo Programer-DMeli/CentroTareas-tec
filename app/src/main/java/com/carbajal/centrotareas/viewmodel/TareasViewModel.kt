@@ -145,15 +145,19 @@ class TareasViewModel(
             val inicio = System.currentTimeMillis()
 
             try {
-                val perfil = repository.cargarPerfil()
-                val pedidos = repository.cargarPedidos(_simularError.value)
-                val tiempo = System.currentTimeMillis() - inicio
-                _dosCargasState.value = DosCargasState.Exito(
-                    modo = "Una por una",
-                    perfil = perfil,
-                    cantidadPedidos = pedidos.size,
-                    ms = tiempo
-                )
+                kotlinx.coroutines.withTimeout(2000L) {
+                    val perfil = repository.cargarPerfil()
+                    val pedidos = repository.cargarPedidos(_simularError.value)
+                    val tiempo = System.currentTimeMillis() - inicio
+                    _dosCargasState.value = DosCargasState.Exito(
+                        modo = "Una por una",
+                        perfil = perfil,
+                        cantidadPedidos = pedidos.size,
+                        ms = tiempo
+                    )
+                }
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                _dosCargasState.value = DosCargasState.Error("Tardó demasiado")
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -170,18 +174,22 @@ class TareasViewModel(
             val inicio = System.currentTimeMillis()
 
             try {
-                val resultado = coroutineScope {
-                    val a = async { repository.cargarPerfil() }
-                    val b = async { repository.cargarPedidos(_simularError.value) }
-                    Pair(a.await(), b.await())
+                kotlinx.coroutines.withTimeout(2000L) {
+                    val resultado = coroutineScope {
+                        val a = async { repository.cargarPerfil() }
+                        val b = async { repository.cargarPedidos(_simularError.value) }
+                        Pair(a.await(), b.await())
+                    }
+                    val tiempo = System.currentTimeMillis() - inicio
+                    _dosCargasState.value = DosCargasState.Exito(
+                        modo = "A la vez",
+                        perfil = resultado.first,
+                        cantidadPedidos = resultado.second.size,
+                        ms = tiempo
+                    )
                 }
-                val tiempo = System.currentTimeMillis() - inicio
-                _dosCargasState.value = DosCargasState.Exito(
-                    modo = "A la vez",
-                    perfil = resultado.first,
-                    cantidadPedidos = resultado.second.size,
-                    ms = tiempo
-                )
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                _dosCargasState.value = DosCargasState.Error("Tardó demasiado")
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {

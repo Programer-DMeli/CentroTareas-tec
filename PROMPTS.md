@@ -1,0 +1,7 @@
+# Registro de Prompts
+
+| Prompt que escribí | Qué respondió Gemini | Qué cambié o descarté | Por qué |
+| :--- | :--- | :--- | :--- |
+| Actua como un tutor que me ayude a implementar la mejora de 'Tiempo máximo' en la app CentroTareas. Usa withTimeout en las cargas de datos: si el proceso tarda más de 2 segundos, muestra el mensaje 'Tardó demasiado'. Realiza los cambios modificando únicamente las capas ViewModel y View, asegurándote de no romper la arquitectura MVVM + Repository | Implementó `withTimeout(2000L)` en `cargarUnaPorUna()` y `cargarALaVez()` dentro de `TareasViewModel.kt`, capturando `TimeoutCancellationException` para establecer el estado de error en `DosCargasState.Error("Tardó demasiado")`, reutilizando el renderizado de errores en la View (`PantallaTareas.kt`). | Se descartó modificar la capa de Repositorio o Datos, aplicando el timeout directamente en el ViewModel alrededor de las corrutinas. | Respeta estrictamente la arquitectura MVVM + Repository, manteniendo la fuente de datos limpia y desacoplada de reglas de tiempo de UI. |
+| *Pendiente* | *Pendiente* | *Pendiente* | *Pendiente* |
+| *Pendiente* | *Pendiente* | *Pendiente* | *Pendiente* |
