@@ -17,3 +17,6 @@
 
 ## Observación del Paso 4
 - **Cancelación y Control de Concurrencia**: Se gestionó la referencia al `Job` devuelto por `viewModelScope.launch` y un estado booleano `corriendo` expuesto como `StateFlow<Boolean>`. Al pulsar **Iniciar**, si ya está corriendo, se previene un doble inicio. Al pulsar **Cancelar**, se invoca `trabajo?.cancel()`, deteniendo el `delay` cooperativo en curso y actualizando el mensaje a **Cancelado** mientras la barra mantiene el porcentaje alcanzado. El bloque `finally` garantiza que `corriendo` vuelva a `false` permitiendo reiniciar la tarea.
+
+## Observación del Paso 5
+- **Cálculo Pesado de Números Primos en Segundo Plano**: Se implementó `TareasRepository` y `TareasRepositoryLocal.contarPrimos(hasta)` ejecutándose dentro de `withContext(Dispatchers.Default)` com llamadas a `ensureActive()` en cada iteración para permitir cancelación cooperativa a mitad del cálculo intensivo de CPU. El ViewModel mide el tiempo transcurrido con `System.currentTimeMillis()` y expone los resultados (ej. 41538 primos hasta 500,000 en ~1240 ms). La interfaz permanece totalmente fluida permitiendo seguir incrementando el contador o cancelar el cálculo en cualquier momento.
