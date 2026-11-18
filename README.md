@@ -14,3 +14,6 @@
 
 ## Observación del Paso 3
 - **Progreso en tiempo real**: Se implementó `LinearProgressIndicator` enlazado a un `StateFlow<Float>` de `0f` a `1f` en el ViewModel. Durante las 100 iteraciones con `delay(40)` dentro de `Dispatchers.Default`, el progreso avanza progresivamente hasta el 100% (~4 segundos) mientras la UI se mantiene 100% responsiva (permitiendo seguir incrementando el contador con el botón "Tócame").
+
+## Observación del Paso 4
+- **Cancelación y Control de Concurrencia**: Se gestionó la referencia al `Job` devuelto por `viewModelScope.launch` y un estado booleano `corriendo` expuesto como `StateFlow<Boolean>`. Al pulsar **Iniciar**, si ya está corriendo, se previene un doble inicio. Al pulsar **Cancelar**, se invoca `trabajo?.cancel()`, deteniendo el `delay` cooperativo en curso y actualizando el mensaje a **Cancelado** mientras la barra mantiene el porcentaje alcanzado. El bloque `finally` garantiza que `corriendo` vuelva a `false` permitiendo reiniciar la tarea.

@@ -26,6 +26,7 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
     val contador by viewModel.contador.collectAsState()
     val mensaje by viewModel.mensaje.collectAsState()
     val progreso by viewModel.progreso.collectAsState()
+    val corriendo by viewModel.corriendo.collectAsState()
 
     Scaffold(
         topBar = {
@@ -59,6 +60,13 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    Text(
+                        text = "Tarea con progreso",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
                     Button(
                         onClick = { viewModel.incrementarContador() },
                         modifier = Modifier
@@ -69,14 +77,28 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                         Text("Tócame: $contador", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
 
-                    Button(
-                        onClick = { viewModel.tareaLarga() },
-                        modifier = Modifier
-                            .height(48.dp)
-                            .wrapContentWidth(),
-                        shape = RoundedCornerShape(50)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Iniciar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Button(
+                            onClick = { viewModel.tareaLarga() },
+                            enabled = !corriendo,
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text("Iniciar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
+
+                        OutlinedButton(
+                            onClick = { viewModel.cancelar() },
+                            enabled = corriendo,
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
                     }
 
                     LinearProgressIndicator(
@@ -103,53 +125,6 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Dashed observation box for Step 3
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFE3F2FD))
-                    .dashedBorder(
-                        width = 1.5.dp,
-                        color = Color(0xFF90CAF9),
-                        cornerRadius = 8.dp,
-                        dashLength = 6.dp,
-                        gapLength = 4.dp
-                    )
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "La barra avanza de 0 a 100 % en unos 4 segundos\ny el contador Tócame sigue sumando.",
-                    color = Color(0xFF1565C0),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
-                )
-            }
         }
     }
-}
-
-fun Modifier.dashedBorder(
-    width: Dp,
-    color: Color,
-    cornerRadius: Dp = 8.dp,
-    dashLength: Dp = 8.dp,
-    gapLength: Dp = 4.dp
-) = this.drawBehind {
-    val stroke = Stroke(
-        width = width.toPx(),
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLength.toPx(), gapLength.toPx()), 0f)
-    )
-    drawRoundRect(
-        color = color,
-        style = stroke,
-        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-    )
 }
