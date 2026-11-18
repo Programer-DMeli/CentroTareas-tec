@@ -29,6 +29,9 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
     val primosResultado by viewModel.primosResultado.collectAsState()
     val primosCorriendo by viewModel.primosCorriendo.collectAsState()
 
+    val dosCargasCorriendo by viewModel.dosCargasCorriendo.collectAsState()
+    val dosCargasResultado by viewModel.dosCargasResultado.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -202,6 +205,118 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                                 lineHeight = 22.sp
                             )
                         }
+                    }
+                }
+            }
+
+            // Card 3: Dos cargas
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Dos cargas",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedButton(
+                            onClick = { viewModel.cargarUnaPorUna() },
+                            enabled = !dosCargasCorriendo,
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text("Una por una", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
+
+                        Button(
+                            onClick = { viewModel.cargarALaVez() },
+                            enabled = !dosCargasCorriendo,
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text("A la vez", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
+                    if (dosCargasCorriendo) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .padding(vertical = 8.dp)
+                        )
+                    }
+
+                    dosCargasResultado?.let { res ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFE8F5E9))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Modo: ${res.modo}",
+                                    color = Color(0xFF1B5E20),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Perfil: ${res.perfil}",
+                                    color = Color(0xFF1B5E20),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "Pedidos: ${res.numPedidos}",
+                                    color = Color(0xFF1B5E20),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "Tiempo: ${res.tiempoMs} ms",
+                                    color = Color(0xFF1B5E20),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = Color(0xFFE3F2FD),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text(
+                            text = "«Una por una» tarda ≈ 5000 ms",
+                            color = Color(0xFF1565C0),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
                     }
                 }
             }

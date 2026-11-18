@@ -7,12 +7,21 @@ import com.carbajal.centrotareas.data.TareasRepository
 import com.carbajal.centrotareas.data.TareasRepositoryLocal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+data class DosCargasResultado(
+    val modo: String,
+    val perfil: String,
+    val numPedidos: Int,
+    val tiempoMs: Long
+)
 
 class TareasViewModel(
     private val repository: TareasRepository = TareasRepositoryLocal()
@@ -42,6 +51,13 @@ class TareasViewModel(
     val primosCorriendo: StateFlow<Boolean> = _primosCorriendo.asStateFlow()
 
     private var trabajoPrimos: Job? = null
+
+    // --- Step 6: Dos cargas states ---
+    private val _dosCargasCorriendo = MutableStateFlow(false)
+    val dosCargasCorriendo: StateFlow<Boolean> = _dosCargasCorriendo.asStateFlow()
+
+    private val _dosCargasResultado = MutableStateFlow<DosCargasResultado?>(null)
+    val dosCargasResultado: StateFlow<DosCargasResultado?> = _dosCargasResultado.asStateFlow()
 
     fun incrementarContador() {
         _contador.value += 1
@@ -110,5 +126,60 @@ class TareasViewModel(
     fun cancelarPrimos() {
         trabajoPrimos?.cancel()
         _primosResultado.value = "Cancelado"
+    }
+
+    fun cargarUnaPorUna() {
+        if (_dosCargasCorriendo.value) return
+
+        viewModelScope.launch {
+            _dosCargasCorriendo.value = true
+            _dosCargasResultado.value = null
+            val inicio = System.currentTimeMillis()
+
+            try {
+                val perfil = repository.cargarPerfil()
+                val pedidos = repository.cargarPedidos(false)
+                val tiempo = System.currentTimeMillis() - inicio
+                _dosCargasResultado.value = DosCargasResultado(
+                    modo = "Una por una",
+                    perfil = perfil,
+                    numPedidos = pedidos.size,
+                    tiempoMs = tiempo
+                )
+            } catch (e: Exception) {
+                // handle error
+            } finally {
+                _dosCargasCorriendo.value = false
+            }
+        }
+    }
+
+    fun cargarALaVez() {   //se implemento cargar a la vez utilizando cooutineScope y Async par aejecutar ambas operaciones en paraleo
+        if (_dosCargasCorriendo.value) return
+
+        viewModelScope.launch {
+            _dosCargasCorriendo.value = true
+            _dosCargasResultado.value = null
+            val inicio = System.currentTimeMillis()
+
+            try {
+                val resultado = coroutineScope {
+                    val a = async { repository.cargarPerfil() }
+                    val b = async { repository.cargarPedidos(false) }
+                    Pair(a.await(), b.await())
+                }
+                val tiempo = System.currentTimeMillis() - inicio
+                _dosCargasResultado.value = DosCargasResultado(
+                    modo = "A la vez",
+                    perfil = resultado.first,
+                    numPedidos = resultado.second.size,
+                    tiempoMs = tiempo
+                )
+            } catch (e: Exception) {
+                // handle error
+            } finally {
+                _dosCargasCorriendo.value = false
+            }
+        }
     }
 }
