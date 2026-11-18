@@ -6,12 +6,16 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 class TareasRepositoryLocal : TareasRepository {
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
+    override suspend fun contarPrimos(hasta: Int, onProgress: (Float) -> Unit): Int = withContext(Dispatchers.Default) {
         var cantidad = 0
+        val total = hasta.toFloat()
         for (n in 2..hasta) {
             ensureActive()
             if (esPrimo(n)) {
                 cantidad++
+            }
+            if (n % 2000 == 0 || n == hasta) {
+                onProgress(n / total)
             }
         }
         cantidad

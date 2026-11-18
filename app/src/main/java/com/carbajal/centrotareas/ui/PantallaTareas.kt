@@ -31,6 +31,7 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
     val primosInput by viewModel.primosInput.collectAsState()
     val primosResultado by viewModel.primosResultado.collectAsState()
     val primosCorriendo by viewModel.primosCorriendo.collectAsState()
+    val primosProgreso by viewModel.primosProgreso.collectAsState()
 
     val dosCargasState by viewModel.dosCargasState.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
@@ -192,6 +193,23 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                         ) {
                             Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                         }
+                    }
+
+                    if (primosCorriendo) {
+                        LinearProgressIndicator(
+                            progress = { primosProgreso },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                        )
+                        val porcentajePrimos = (primosProgreso * 100).toInt()
+                        Text(
+                            text = "$porcentajePrimos %",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
 
                     if (primosResultado.isNotEmpty()) {

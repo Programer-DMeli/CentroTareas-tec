@@ -55,6 +55,9 @@ class TareasViewModel(
     private val _primosCorriendo = MutableStateFlow(false)
     val primosCorriendo: StateFlow<Boolean> = _primosCorriendo.asStateFlow()
 
+    private val _primosProgreso = MutableStateFlow(0f)
+    val primosProgreso: StateFlow<Float> = _primosProgreso.asStateFlow()
+
     private var trabajoPrimos: Job? = null
 
     // --- Step 6 & 7: Dos cargas states & simularError ---
@@ -117,10 +120,13 @@ class TareasViewModel(
         trabajoPrimos = viewModelScope.launch {
             _primosCorriendo.value = true
             _primosResultado.value = "Calculando..."
+            _primosProgreso.value = 0f
             val inicio = System.currentTimeMillis()
 
             try {
-                val cantidad = repository.contarPrimos(hasta)
+                val cantidad = repository.contarPrimos(hasta) { progreso ->
+                    _primosProgreso.value = progreso
+                }
                 val tiempo = System.currentTimeMillis() - inicio
                 _primosResultado.value = "Primos hasta $hasta: $cantidad\nTiempo: $tiempo ms"
             } catch (e: kotlinx.coroutines.CancellationException) {
