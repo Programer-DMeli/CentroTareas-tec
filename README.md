@@ -24,17 +24,17 @@ graph TD
 
 ---
 
-## 📸 Evidencias y Pasos del Reto
+## 📸 Galería de Evidencias y Pasos del Reto
 
-| Paso / Característica | Vista Previa | Descripción y Comportamiento |
-| :--- | :---: | :--- |
-| **1. Tarea Bloqueante (MAL)** | <img src="app/src/main/res/drawable/tarea_mala.jpeg" width="160" /> | `Thread.sleep(4000)` bloquea el hilo principal (UI Thread), congelando la pantalla y evitando que se renderice el texto de carga. |
-| **2 & 3. Segundo Plano y Progreso** | <img src="app/src/main/res/drawable/porcentaje_carga.jpeg" width="160" /> | Uso de `Dispatchers.Default` y `delay()`. La barra avanza de 0% a 100% mientras la UI sigue respondiendo y sumando al contador. |
-| **4. Cancelación de Tarea** | <img src="app/src/main/res/drawable/tarea_larga.jpeg" width="160" /> | El `Job` se cancela de forma cooperativa al pulsar **Cancelar**, deteniendo el progreso y mostrando el estado "Cancelado". |
-| **5. Números Primos (CPU)** | <img src="app/src/main/res/drawable/numeros_primos.jpeg" width="160" /> | Cálculo intensivo de números primos en segundo plano con `ensureActive()` para cancelación segura y medición de tiempo en ms. |
-| **6. Dos Cargas en Paralelo** | <img src="app/src/main/res/drawable/dos_cargas.jpeg" width="160" /> | Comparación de carga secuencial (~5s) vs. en paralelo con `async` (`coroutineScope`) (~3s). |
-| **7. Error Simulado** | <img src="app/src/main/res/drawable/error_simulado.jpeg" width="160" /> | Manejo robusto de excepciones (ej. `IOException("Sin conexión")`) con estados de error y reintento. |
-| **Mejoras IA / Historial** | <img src="app/src/main/res/drawable/historial_primos_mejora_ia.jpeg" width="160" /> | Funcionalidades adicionales de historial y procesamiento optimizado. |
+| 1. Tarea Bloqueante (MAL) | 2 & 3. Segundo Plano y Progreso | 4. Cancelación de Tarea |
+| :---: | :---: | :---: |
+| <img src="app/src/main/res/drawable/tarea_mala.jpeg" width="160" /> | <img src="app/src/main/res/drawable/porcentaje_carga.jpeg" width="160" /> | <img src="app/src/main/res/drawable/tarea_larga.jpeg" width="160" /> |
+| `Thread.sleep(4000)` bloquea el hilo principal (UI Thread), congelando la pantalla. | Uso de `Dispatchers.Default` y `delay()`. La barra avanza de 0% a 100% fluidamente. | El `Job` se cancela de forma cooperativa al pulsar **Cancelar**. |
+
+| 5. Números Primos (CPU) | 6. Dos Cargas en Paralelo | 7. Error Simulado / IA |
+| :---: | :---: | :---: |
+| <img src="app/src/main/res/drawable/numeros_primos.jpeg" width="160" /> | <img src="app/src/main/res/drawable/dos_cargas.jpeg" width="160" /> | <img src="app/src/main/res/drawable/error_simulado.jpeg" width="160" /> |
+| Cálculo intensivo de primos en 2do plano con `ensureActive()` y medición de ms. | Comparación de carga secuencial (~5s) vs. paralelo con `async` (`coroutineScope`) (~3s). | Manejo robusto de excepciones (`IOException`) con estados de error y reintento. |
 
 ---
 
