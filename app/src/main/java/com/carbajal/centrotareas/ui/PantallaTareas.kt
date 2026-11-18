@@ -35,6 +35,7 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
 
     val dosCargasState by viewModel.dosCargasState.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
+    val historial by viewModel.historial.collectAsState()
     val dosCargasCorriendo = dosCargasState is DosCargasState.Cargando
 
     val scrollState = rememberScrollState()
@@ -387,6 +388,55 @@ fun PantallaTareas(viewModel: TareasViewModel = TareasViewModel()) {
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
+                    }
+                }
+            }
+
+            // Card 4: Historial de resultados
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "Historial de resultados",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    if (historial.isEmpty()) {
+                        Text(
+                            text = "No hay resultados guardados",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    } else {
+                        historial.forEachIndexed { index, item ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFF5F5F5))
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = "${index + 1}. $item",
+                                    fontSize = 13.sp,
+                                    color = Color.DarkGray
+                                )
+                            }
+                        }
                     }
                 }
             }
